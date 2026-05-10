@@ -1,0 +1,15 @@
+node_modules
+dist
+.DS_Store
+.env
+.env.local
+coverage
+postgres-data
+redis-data
+apps/dashboard/dist
+apps/dashboard/node_modules
+apps/control-plane/node_modules
+apps/demo-backend/node_modules
+packages/sdk/node_modules
+packages/shared-types/node_modules
+

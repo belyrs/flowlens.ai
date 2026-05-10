@@ -1,0 +1,310 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flowlens.local/schemas/runtime-event.schema.json",
+  "title": "FlowLens Runtime Event Batch",
+  "description": "Schema for SDK batches sent from the instrumented backend service to the FlowLens control plane.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "sentAt", "service", "sdk", "events"],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "sentAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "service": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "runtime", "framework"],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "runtime": {
+          "type": "string",
+          "const": "node"
+        },
+        "framework": {
+          "type": "string",
+          "const": "express"
+        },
+        "version": {
+          "type": "string"
+        },
+        "environment": {
+          "type": "string",
+          "default": "local"
+        }
+      }
+    },
+    "sdk": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "const": "backend-flow-mapper-sdk"
+        },
+        "version": {
+          "type": "string"
+        }
+      }
+    },
+    "events": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/runtimeEvent"
+      }
+    }
+  },
+  "$defs": {
+    "requestRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "method"],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "method": {
+          "type": "string",
+          "enum": ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"]
+        },
+        "path": {
+          "type": "string",
+          "description": "Observed raw request path, such as /records/42."
+        },
+        "routePath": {
+          "type": "string",
+          "description": "Normalized matched route, such as /records/:id."
+        }
+      }
+    },
+    "redaction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["headersRedacted", "payloadCaptured"],
+      "properties": {
+        "headersRedacted": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "payloadCaptured": {
+          "type": "boolean"
+        },
+        "sqlParamsCaptured": {
+          "type": "boolean",
+          "default": false
+        },
+        "redisKeysHashed": {
+          "type": "boolean",
+          "default": true
+        }
+      }
+    },
+    "runtimeEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "type",
+        "observedAt",
+        "request",
+        "observationType",
+        "confidence"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "parentEventId": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "request.started",
+            "request.finished",
+            "db.query",
+            "redis.command",
+            "external.http"
+          ]
+        },
+        "observedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "sequenceNo": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "request": {
+          "$ref": "#/$defs/requestRef"
+        },
+        "observationType": {
+          "type": "string",
+          "enum": ["observed", "inferred", "unknown"]
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "durationMs": {
+          "type": "number",
+          "minimum": 0
+        },
+        "statusCode": {
+          "type": "integer",
+          "minimum": 100,
+          "maximum": 599
+        },
+        "db": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "driver": {
+              "type": "string",
+              "const": "postgresql"
+            },
+            "operation": {
+              "type": "string",
+              "enum": ["SELECT", "INSERT", "UPDATE", "DELETE", "UNKNOWN"]
+            },
+            "tables": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "normalizedSql": {
+              "type": "string"
+            },
+            "rowCount": {
+              "type": "integer"
+            },
+            "write": {
+              "type": "boolean"
+            }
+          }
+        },
+        "redis": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "command": {
+              "type": "string"
+            },
+            "operation": {
+              "type": "string",
+              "enum": ["read", "write", "unknown"]
+            },
+            "keyNamespace": {
+              "type": "string"
+            },
+            "keyHash": {
+              "type": "string"
+            },
+            "write": {
+              "type": "boolean"
+            }
+          }
+        },
+        "http": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "method": {
+              "type": "string"
+            },
+            "host": {
+              "type": "string"
+            },
+            "pathTemplate": {
+              "type": "string"
+            },
+            "statusCode": {
+              "type": "integer",
+              "minimum": 100,
+              "maximum": 599
+            }
+          }
+        },
+        "response": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "statusCode": {
+              "type": "integer",
+              "minimum": 100,
+              "maximum": 599
+            }
+          }
+        },
+        "redaction": {
+          "$ref": "#/$defs/redaction"
+        },
+        "metadata": {
+          "type": "object"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "db.query"
+              }
+            }
+          },
+          "then": {
+            "required": ["db"]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "redis.command"
+              }
+            }
+          },
+          "then": {
+            "required": ["redis"]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "external.http"
+              }
+            }
+          },
+          "then": {
+            "required": ["http"]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "request.finished"
+              }
+            }
+          },
+          "then": {
+            "required": ["statusCode", "response"]
+          }
+        }
+      ]
+    }
+  }
+}

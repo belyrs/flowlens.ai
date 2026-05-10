@@ -1,0 +1,125 @@
+{
+  "schemaVersion": "1.0",
+  "sentAt": "2026-05-10T07:15:00.000Z",
+  "service": {
+    "name": "sample-service",
+    "runtime": "node",
+    "framework": "express",
+    "version": "0.1.0",
+    "environment": "local"
+  },
+  "sdk": {
+    "name": "backend-flow-mapper-sdk",
+    "version": "0.1.0"
+  },
+  "events": [
+    {
+      "id": "evt_req_start_01",
+      "type": "request.started",
+      "observedAt": "2026-05-10T07:15:00.100Z",
+      "sequenceNo": 1,
+      "request": {
+        "id": "req_01",
+        "method": "GET",
+        "path": "/records/42",
+        "routePath": "/records/:id"
+      },
+      "observationType": "observed",
+      "confidence": 1,
+      "redaction": {
+        "headersRedacted": ["authorization", "cookie", "set-cookie"],
+        "payloadCaptured": false,
+        "sqlParamsCaptured": false,
+        "redisKeysHashed": true
+      },
+      "metadata": {
+        "serviceName": "sample-service"
+      }
+    },
+    {
+      "id": "evt_redis_01",
+      "parentEventId": "evt_req_start_01",
+      "type": "redis.command",
+      "observedAt": "2026-05-10T07:15:00.110Z",
+      "sequenceNo": 2,
+      "request": {
+        "id": "req_01",
+        "method": "GET",
+        "path": "/records/42",
+        "routePath": "/records/:id"
+      },
+      "observationType": "observed",
+      "confidence": 1,
+      "durationMs": 2,
+      "redis": {
+        "command": "GET",
+        "operation": "read",
+        "keyNamespace": "records",
+        "keyHash": "sha256:4ef6d4f7e4cc9d9f3f1f2c0e9e7854f8",
+        "write": false
+      },
+      "redaction": {
+        "headersRedacted": ["authorization", "cookie", "set-cookie"],
+        "payloadCaptured": false,
+        "sqlParamsCaptured": false,
+        "redisKeysHashed": true
+      }
+    },
+    {
+      "id": "evt_db_01",
+      "parentEventId": "evt_req_start_01",
+      "type": "db.query",
+      "observedAt": "2026-05-10T07:15:00.120Z",
+      "sequenceNo": 3,
+      "request": {
+        "id": "req_01",
+        "method": "GET",
+        "path": "/records/42",
+        "routePath": "/records/:id"
+      },
+      "observationType": "observed",
+      "confidence": 1,
+      "durationMs": 8,
+      "db": {
+        "driver": "postgresql",
+        "operation": "SELECT",
+        "tables": ["records"],
+        "normalizedSql": "select * from records where id = ? limit ?",
+        "rowCount": 1,
+        "write": false
+      },
+      "redaction": {
+        "headersRedacted": ["authorization", "cookie", "set-cookie"],
+        "payloadCaptured": false,
+        "sqlParamsCaptured": false,
+        "redisKeysHashed": true
+      }
+    },
+    {
+      "id": "evt_req_finish_01",
+      "parentEventId": "evt_req_start_01",
+      "type": "request.finished",
+      "observedAt": "2026-05-10T07:15:00.135Z",
+      "sequenceNo": 4,
+      "request": {
+        "id": "req_01",
+        "method": "GET",
+        "path": "/records/42",
+        "routePath": "/records/:id"
+      },
+      "observationType": "observed",
+      "confidence": 1,
+      "durationMs": 35,
+      "statusCode": 200,
+      "response": {
+        "statusCode": 200
+      },
+      "redaction": {
+        "headersRedacted": ["authorization", "cookie", "set-cookie"],
+        "payloadCaptured": false,
+        "sqlParamsCaptured": false,
+        "redisKeysHashed": true
+      }
+    }
+  ]
+}

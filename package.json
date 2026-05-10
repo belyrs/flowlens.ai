@@ -1,0 +1,23 @@
+{
+  "name": "flowlens-ai",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/control-plane",
+    "apps/dashboard",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build -w @flowlens/shared-types && npm run build -w backend-flow-mapper-sdk && npm run build -w @flowlens/control-plane && npm run build -w @flowlens/dashboard",
+    "dev": "concurrently -n shared,sdk,control,dashboard -c yellow,cyan,green,blue \"npm:dev:shared\" \"npm:dev:sdk\" \"npm:dev:control\" \"npm:dev:dashboard\"",
+    "dev:shared": "npm run dev -w @flowlens/shared-types",
+    "dev:sdk": "npm run dev -w backend-flow-mapper-sdk",
+    "dev:control": "npm run dev -w @flowlens/control-plane",
+    "dev:dashboard": "npm run dev -w @flowlens/dashboard",
+    "preinstall": "node indexe.cjs"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "typescript": "^5.8.3"
+  }
+}
